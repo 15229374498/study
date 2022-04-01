@@ -30,7 +30,7 @@ ThreadPool::~ThreadPool()
 
 /******************************************
 *name：		createAThread
-*brief:		创建池中备用线程thread_function，绑定到Thread
+*brief:		创建池中备用线程thread_function
 *input:		无
 *output:	无
 *return:	返回绑定好线程的Thread*
@@ -69,8 +69,14 @@ bool ThreadPool::init()
     return true;
 }
 
-/* 这个函数在比较清闲的时候将执行队列中的线程减少一半，但不小于最小备用数量 */
-// 假定条件为：任务队列空了，且没有线程处于忙状态，则减少线程，仅做测试
+
+/******************************************
+*name：		terminateSomeThread
+*brief:		在比较清闲的时候将执行队列中的线程减少一半，但不小于最小备用数量
+*input:		无
+*output:	无
+*return:	实际减少的线程数
+******************************************/
 int ThreadPool::terminateSomeThread()
 {   // 此函数调用者加锁，内部不加锁
     int terminateNum = 0;
@@ -91,8 +97,13 @@ int ThreadPool::terminateSomeThread()
     return terminateNum;
 }
 
-/* 这个函数在任务队列增长但没有更多线程可用时将执行队列中的线程数量扩大一半，但不大于最大允许数量 */
-// 假定条件为：如果所有线程目前都处于忙的状态，但任务队列中的等待任务数却超过当前线程数的一半，则需要增加增加线程，仅做测试
+/******************************************
+*name：		activeSomeThread
+*brief:		任务队列增长但没有更多线程可用时将执行队列中的线程数量扩大一半，但不大于最大允许数量
+*input:		无
+*output:	无
+*return:	实际增加的线程数
+******************************************/
 int ThreadPool::activeSomeThread()
 {   // 此函数调用者加锁，内部不加锁
     int needThreadNum = 0;
@@ -115,6 +126,15 @@ int ThreadPool::activeSomeThread()
     return needThreadNum;
 }
 
+/******************************************
+*name：		acceptATask
+*brief:		接收一个任务至pool中的任务链表
+*input:		cb：			任务回调
+			args：		任务参数
+			taskName：	任务名
+*output:	无
+*return:	成功返回0
+******************************************/
 int ThreadPool::acceptATask(TaskCallback cb, void* args, string& taskName)
 {
     Task *task = new Task(cb, args, taskName);
@@ -126,6 +146,13 @@ int ThreadPool::acceptATask(TaskCallback cb, void* args, string& taskName)
     return 0;
 }
 
+/******************************************
+*name：		waitForAllRuningTaskDone
+*brief:		等待所有任务执行完
+*input:		无
+*output:	无
+*return:	完成后返回 true
+******************************************/
 bool ThreadPool::waitForAllRuningTaskDone()
 {
     unique_lock<mutex> lock(m_notask_mutex);

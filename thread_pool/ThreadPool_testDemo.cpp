@@ -42,7 +42,7 @@ int main()
 	}
 
 	//2、放入10个任务，每个的运行时间不一致
-    for(int i = 0; i < 30 ; i++)    
+    for(int i = 0; i < 10 ; i++)    
     {
         workdata* data = new workdata{i + 1, i + 1};
         string name = "work" + to_string(i + 1);
